@@ -117,7 +117,7 @@ function mostrarListasEnTabla(listas) {
 
 function opcionesModal() {
     $("#tablaLista").on('click', '.btn-borrar', function () {
-        // Obtén el ID del elemento que deseas eliminar desde el atributo "data-id"
+        // Obtén el nombre del elemento que deseas eliminar desde el atributo
         var nombreLista = $(this).closest('tr').find('td:eq(1)').text();
         console.log(nombreLista)
         // Envía una solicitud DELETE al backend para eliminar el elemento con el ID específico
@@ -154,6 +154,7 @@ function opcionesModal() {
         // Obtén el ID del elemento que deseas eliminar desde el atributo "data-id"
         var nombreLista = $(this).closest('tr').find('td:eq(1)').text();
         $("#modalDetalleLista").modal('hide');
+        $("#exampleModalLong").modal('hide');
         console.log("dsad")
     });
 
@@ -310,7 +311,7 @@ function agregarCancionAlista() {
         var artista = $(this).closest('tr').find('td:eq(2)').text();
         var album = $(this).closest('tr').find('td:eq(3)').text();
         var anno = $(this).closest('tr').find('td:eq(4)').text();
-        var  idListaReproduccion=$("idListaReproduccion").val()
+        var idListaReproduccion = $(".idListaReproduccion").val()
         console.log("idListaReproduccion: ->" + idListaReproduccion);
         console.log("ID de la canción: " + id);
         console.log("Nombre de la canción: " + nombreCancion);
@@ -393,7 +394,7 @@ function mostrarListasEnTablaBuscar(listas) {
            <td>${listas.nombre}</td>
            <td>
            <button class="btn btn-primary agregarCancion" > agregar cancion</button>
-           <button class="btn btn-success" data-id="1"> ver canciones</button>
+           <button class="btn btn-success btnVerDetralleLista" data-id="1" > ver canciones</button>
             <button class="btn btn-light btn-borrar" data-id="1">
                   <img src="./assets/img/delete.png" alt="" srcset="">
              </button>
@@ -406,8 +407,8 @@ function mostrarListasEnTablaBuscar(listas) {
 }
 function listarCancionesModalDetalleLista(nombreLista) {
     // Realizar una solicitud GET a la API para obtener todas las canciones
-    console.log("->>>>"+nombreLista)
-    fetch('http://localhost:8080/lists/get/'+nombreLista, {
+    console.log("->>>>" + nombreLista)
+    fetch('http://localhost:8080/lists/get/' + nombreLista, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -442,7 +443,7 @@ function mostrarCancionesdetalleLista(canciones) {
            
         </tr>
         `;
-   });
+    });
     $("#tablaCancionesDeLista").html(plantilla);
 }
 
