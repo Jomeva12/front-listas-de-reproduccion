@@ -103,8 +103,8 @@ function mostrarListasEnTabla(listas) {
            <td>${lista.nombre}</td>
            <td>
            
-                <button class="btn btn-primary agregarCancion" > agregar cancion</button>
-                <button class="btn btn-success btnVerDetralleLista" data-id="1"> ver canciones</button>
+                <button class="btn btn-primary agregarCancion" > add</button>
+                <button class="btn btn-success btnVerDetralleLista" data-id="1"> ver</button>
                  <button class="btn btn-light btn-borrar" data-id="1">
                        <img src="./assets/img/delete.png" alt="" srcset="">
                   </button>
@@ -128,11 +128,12 @@ function opcionesModal() {
         // Obtén el nombre de la lista desde la celda de la columna 1 (segunda columna)
         var nombreLista = $(this).closest('tr').find('td:eq(1)').text();
         var id = $(this).closest('tr').find('td:eq(0)').text();
+        var idLista = $(this).closest('tr').find('td:eq(0)').text();
         // Muestra el nombre de la lista en el elemento con el ID "nombreLista"
         $(".nombreLista").html(nombreLista);
         $(".idListaReproduccion").val(id);
         console.log(id)
-        listarCancionesModal()
+        listarCancionesModal(idLista)
         // Muestra el modal
         $("#exampleModalLong").modal('show');
     });
@@ -140,11 +141,12 @@ function opcionesModal() {
     $("#tablaLista").on('click', '.btnVerDetralleLista', function () {
         // Obtén el nombre de la lista desde la celda de la columna 1 (segunda columna)
         var nombreLista = $(this).closest('tr').find('td:eq(1)').text();
+     
         var id = $(this).closest('tr').find('td:eq(0)').text();
         // Muestra el nombre de la lista en el elemento con el ID "nombreLista"
         $(".nombreLista").html(nombreLista);
         $(".idListaReproduccion").val(id);
-        console.log(id)
+     
         listarCancionesModalDetalleLista(nombreLista)
         // Muestra el modal
         $("#modalDetalleLista").modal('show');
@@ -206,7 +208,7 @@ function crearCancion() {
         };
 
         // Realizar una solicitud POST a la API para crear la canción
-        fetch('http://localhost:8080/canciones', {
+        fetch('http://localhost:8080/cancion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -232,7 +234,7 @@ function crearCancion() {
 
 function listarCanciones() {
     // Realizar una solicitud GET a la API para obtener todas las canciones
-    fetch('http://localhost:8080/canciones', {
+    fetch('http://localhost:8080/cancion', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -266,9 +268,9 @@ function mostrarCancionesEnTabla(canciones) {
     $("#tablaCanciones").html(plantilla);
 }
 
-function listarCancionesModal() {
+function listarCancionesModal(idLista) {
     // Realizar una solicitud GET a la API para obtener todas las canciones
-    fetch('http://localhost:8080/canciones', {
+    fetch('http://localhost:8080/cancion', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -277,7 +279,7 @@ function listarCancionesModal() {
         .then(response => response.json())
         .then(data => {
             // Llamar a una función para mostrar las canciones en la tabla
-            mostrarCancionesEnModal(data);
+            mostrarCancionesEnModal(data,idLista);
         })
         .catch(error => {
             console.error('Error en la solicitud:', error);
@@ -285,49 +287,54 @@ function listarCancionesModal() {
 }
 
 // Función para mostrar las canciones en la tabla
-function mostrarCancionesEnModal(canciones) {
+function mostrarCancionesEnModal(canciones, idLista) {
+
     var plantilla = "";
     // Recorrer las canciones y agregarlas a la tabla
     canciones.forEach(cancion => {
-        plantilla += `
-        <tr>
-        <td>${cancion.id}</td>
-            <td>${cancion.titulo}</td>
-            <td>${cancion.artista}</td>
-            <td>${cancion.album}</td>
-            <td>${cancion.anno}</td>
+        existeCancionEnlista(idLista, cancion.id)
+        .then(existe => {
+            var botonStyle = "btn btn-primary"; // Inicialmente sin estilo
+var filaTachada=""
+            // Si la canción existe, cambia el estilo del botón
+            if (existe) {
+                botonStyle = "existeItem"; // Cambiar a la clase CSS que desees (en este caso, 'btn-danger' para un botón rojo)
+                filaTachada="filaTachada"
+            }
 
-            <td><button class="btn btn-primary agregarCancionAlista" > agregar</button></td>
-        </tr>
-        `;
+            console.log(botonStyle);
+
+            plantilla += `
+            <tr class=${filaTachada}>
+                <td>${cancion.id}</td>
+                <td>${cancion.titulo}</td>
+                <td>${cancion.artista}</td>
+                <td>${cancion.album}</td>
+                <td>${cancion.anno}</td>
+
+                <td><button class=" ${botonStyle} agregarCancionAlista" > agregar</button></td>
+            </tr>
+            `;
+            $("#tablaCancionesModal").html(plantilla);
+        })
+        .catch(error => {
+            console.error("Error al verificar la existencia de la canción:", error);
+        });
     });
     $("#tablaCancionesModal").html(plantilla);
 }
 function agregarCancionAlista() {
     $("#tablaCancionesModal").on('click', '.agregarCancionAlista', function () {
         // Obtén el ID del elemento que deseas eliminar desde el atributo "data-id"
-        var id = $(this).closest('tr').find('td:eq(0)').text();
-        var nombreCancion = $(this).closest('tr').find('td:eq(1)').text();
-        var artista = $(this).closest('tr').find('td:eq(2)').text();
-        var album = $(this).closest('tr').find('td:eq(3)').text();
-        var anno = $(this).closest('tr').find('td:eq(4)').text();
+        var id = $(this).closest('tr').find('td:eq(0)').text();       
         var idListaReproduccion = $(".idListaReproduccion").val()
-        console.log("idListaReproduccion: ->" + idListaReproduccion);
-        console.log("ID de la canción: " + id);
-        console.log("Nombre de la canción: " + nombreCancion);
-        console.log("Artista: " + artista);
-        console.log("Álbum: " + album);
-        console.log("Año: " + anno);
-
+       var fila=$(this).closest('tr')
+        var elementoACancelar = $(this);
         var cancion = {
-            id: id, // El ID de la canción (cambia según tu necesidad)
-            nombre: "Nombre de la canción",
-            artista: "Nombre del artista",
-            album: "Nombre del álbum",
-            anno: 2023 // Año de la canción (cambia según tu necesidad)
+            id: id          
         };
         var requestOptions = {
-            method: 'PUT',  // Cambia 'POST' a 'PUT' aquí
+            method: 'PUT', 
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -338,15 +345,75 @@ function agregarCancionAlista() {
             .then(response => {
                 if (response.ok) {
                     console.log("Canción agregada con éxito a la lista.");
-                    $(this).hide();
+                    elementoACancelar.hide();
+                    $(this).closest('tr').css("text-decoration","line-through")
                     // Actualiza la interfaz de usuario u realiza otras acciones necesarias.
                 } else {
+                    alert("La cancion ya existe en el listado")
                     console.error("Error al agregar la canción a la lista:", response.statusText);
                 }
             })
             .catch(error => {
                 console.error("Error al realizar la solicitud:", error);
             });
+    });
+}
+
+// function existeCancionEnlista(idLista, id) {
+//     console.log(".....> " + id)
+
+//     fetch(`http://localhost:8080/lists/getcancion/${idLista}/${id}`, {
+//         method: 'GET',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         }
+//     })
+    
+//     .then(response => {
+//         if (response.ok) {
+//             return response.json(); // Lee el cuerpo de la respuesta como JSON
+//         } else {
+//             throw new Error("Error en la solicitud: " + response.statusText);
+//         }
+//     })
+//     .then(data => {
+//         // data contendrá el valor booleano (true o false) de si la canción existe
+//         if (data) {
+//             console.log("La canción ya existe en la lista.---> "+id);
+       
+//             // Aquí puedes realizar acciones específicas para el caso en que la canción ya existe
+//         } else {
+//             console.log("esta no se encuentra ->" + id);
+          
+//             $(`#${id}`).addClass("existeItem");
+//             // Actualiza la interfaz de usuario u realiza otras acciones necesarias.
+//         }
+//     })
+//     .catch(error => {
+//         console.error("Error al realizar la solicitud:", error);
+//     });
+// }
+function existeCancionEnlista(idLista, id) {
+    return fetch(`http://localhost:8080/lists/getcancion/${idLista}/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json(); // Lee el cuerpo de la respuesta como JSON
+        } else {
+            throw new Error("Error en la solicitud: " + response.statusText);
+        }
+    })
+    .then(data => {
+        // data contendrá el valor booleano (true o false) de si la canción existe
+        return data;
+    })
+    .catch(error => {
+        console.error("Error al realizar la solicitud:", error);
+        return false; // En caso de error, retorna false
     });
 }
 
@@ -390,11 +457,11 @@ function mostrarListasEnTablaBuscar(listas) {
 
     plantilla = `
         <tr>    
-          
+        <td>${listas.id}</td>
            <td>${listas.nombre}</td>
            <td>
-           <button class="btn btn-primary agregarCancion" > agregar cancion</button>
-           <button class="btn btn-success btnVerDetralleLista" data-id="1" > ver canciones</button>
+           <button class="btn btn-primary agregarCancion" > add</button>
+           <button class="btn btn-success btnVerDetralleLista" data-id="1" > ver</button>
             <button class="btn btn-light btn-borrar" data-id="1">
                   <img src="./assets/img/delete.png" alt="" srcset="">
              </button>
@@ -405,9 +472,10 @@ function mostrarListasEnTablaBuscar(listas) {
 
     $("#tablaLista").html(plantilla);
 }
-function listarCancionesModalDetalleLista(nombreLista) {
+function listarCancionesModalDetalleLista(nombreLista,) {
     // Realizar una solicitud GET a la API para obtener todas las canciones
-    console.log("->>>>" + nombreLista)
+  
+    console.log('Datos recibidos:<<<<<<', nombreLista);
     fetch('http://localhost:8080/lists/get/' + nombreLista, {
         method: 'GET',
         headers: {
@@ -416,10 +484,10 @@ function listarCancionesModalDetalleLista(nombreLista) {
     })
         .then(response => response.json())
         .then(data => {
-            console.log('Datos recibidos:', data);
-            if (data && Array.isArray(data.canciones)) {
+          
+            if (data && Array.isArray(data.cancion)) {
                 // Aquí puedes estar seguro de que data.canciones existe y es un arreglo
-                mostrarCancionesdetalleLista(data.canciones);
+                mostrarCancionesdetalleLista(data.cancion);
             } else {
                 console.error('No se encontraron canciones válidas en el objeto "data".');
             }
@@ -432,8 +500,9 @@ function mostrarCancionesdetalleLista(canciones) {
     var plantilla = "";
     // Recorrer las canciones y agregarlas a la tabla
     canciones.forEach(cancion => {
+       
         plantilla += `
-        <tr>
+        <tr id=${cancion.id}>
         <td>${cancion.id}</td>
             <td>${cancion.titulo}</td>
             <td>${cancion.artista}</td>
