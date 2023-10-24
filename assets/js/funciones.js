@@ -1,4 +1,5 @@
 $(function () {
+    verificarAutenticacion()
     abrirInputCrearLista()
     abrirInputCrearCancion()
     addLista()
@@ -9,7 +10,17 @@ $(function () {
     agregarCancionAlista()
     buscarLista()
 })
+    // Verifica si hay un token JWT en el almacenamiento local
+const token = localStorage.getItem('tokenJWT');
+console.log(token)
+// Inicializa usuarioAutenticado basado en la presencia del token
+const usuarioAutenticado = !!token;
+function verificarAutenticacion(){
 
+    if (!usuarioAutenticado) {
+        window.location.href = '/login'; // Redirige al usuario a la página de inicio de sesión
+      }
+}
 function abrirInputCrearLista() {
     $("#mostrarInputCrearLista").on('click', function (e) {
         e.preventDefault()
@@ -44,7 +55,8 @@ function addLista() {
         fetch('http://localhost:8080/lists', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(nuevaLista),
 
@@ -69,7 +81,8 @@ function obtenerListasDeReproduccion() {
     fetch('http://localhost:8080/lists', {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
     })
         .then(response => {
@@ -169,6 +182,10 @@ function eliminarListaDeReproduccionPorNombre(nombre) {
     console.log("eliminar->" + nombre)
     fetch(`http://localhost:8080/lists/delete/${nombre}`, {
         method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
     })
         .then(response => {
             if (response.ok) {
@@ -211,7 +228,8 @@ function crearCancion() {
         fetch('http://localhost:8080/cancion', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(nuevaCancion)
         })
@@ -237,7 +255,8 @@ function listarCanciones() {
     fetch('http://localhost:8080/cancion', {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         }
     })
         .then(response => response.json())
@@ -273,7 +292,8 @@ function listarCancionesModal(idLista) {
     fetch('http://localhost:8080/cancion', {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         }
     })
         .then(response => response.json())
@@ -336,7 +356,8 @@ function agregarCancionAlista() {
         var requestOptions = {
             method: 'PUT', 
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(cancion)
         };
@@ -397,7 +418,8 @@ function existeCancionEnlista(idLista, id) {
     return fetch(`http://localhost:8080/lists/getcancion/${idLista}/${id}`, {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         }
     })
     .then(response => {
@@ -426,7 +448,8 @@ function buscarLista() {
             fetch(`http://localhost:8080/lists/get/${datoBuscar}`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 }
             })
                 .then(response => response.json())
@@ -479,7 +502,8 @@ function listarCancionesModalDetalleLista(nombreLista,) {
     fetch('http://localhost:8080/lists/get/' + nombreLista, {
         method: 'GET',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         }
     })
         .then(response => response.json())
